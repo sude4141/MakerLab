@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Yönetici Paneli</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ana Menü</div>
+                    <a href="/admin" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Yönetim</div>
+                    <a href="/admin/cihazlar" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Cihazlar</span>
+                    </a>
+                    <a href="/admin/talepler" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>İş Talepleri</span>
+                    </a>
+                    <a href="/admin/stoklar" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <span>Stok Yönetimi</span>
+                    </a>
+                    <a href="/admin/kullanicilar" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Kullanıcılar</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Raporlar</div>
+                    <a href="/admin/loglar" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Sistem Logları</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Yönetici</div>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Hoş Geldiniz, {{ kullanici.ad_soyad }}</h1>
+                <p class="page-subtitle">MakerLab yönetim paneline hoş geldiniz. Aşağıda sistemin genel durumunu görebilirsiniz.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ cihaz_sayisi }}</h3>
+                        <p>Toplam Cihaz</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ bekleyen_talepler }}</h3>
+                        <p>Bekleyen Talep</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ tamamlanan_isler }}</h3>
+                        <p>Tamamlanan İş</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ kritik_stok }}</h3>
+                        <p>Kritik Stok</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Son İş Talepleri</h3>
+                        <a href="/admin/talepler" class="btn btn-sm btn-secondary">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Öğrenci</th>
+                                    <th>Durum</th>
+                                    <th>Tarih</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for talep in son_talepler %}
+                                <tr>
+                                    <td>#{{ talep.id }}</td>
+                                    <td>{{ talep.ogrenci_adi }}</td>
+                                    <td>
+                                        <span class="badge {% if talep.durum == 'Beklemede' %}badge-warning{% elif talep.durum == 'Onaylandı' %}badge-success{% elif talep.durum == 'Reddedildi' %}badge-danger{% else %}badge-info{% endif %}">
+                                            {{ talep.durum }}
+                                        </span>
+                                    </td>
+                                    <td>{{ talep.talep_tarihi }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Cihaz Durumları</h3>
+                        <a href="/admin/cihazlar" class="btn btn-sm btn-secondary">Yönet</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="device-grid" style="grid-template-columns: 1fr;">
+                            {% for cihaz in cihazlar %}
+                            <div class="device-card {{ 'available' if cihaz.durum == 'Müsait' else 'busy' if cihaz.durum == 'Meşgul' else 'maintenance' }}">
+                                <div class="device-header">
+                                    <span class="device-name"><strong>{{ cihaz.marka_model }}</strong></span>
+                                    <span class="badge {{ 'badge-success' if cihaz.durum == 'Müsait' else 'badge-warning' if cihaz.durum == 'Meşgul' else 'badge-danger' }}">
+                                        {{ cihaz.durum }}
+                                    </span>
+                                </div>
+                                {% if cihaz.kisa_aciklama %}
+                                <div class="device-info">
+                                    <span style="font-size: 13px; color: var(--text-muted);"><i class="fas fa-info-circle"></i> {{ cihaz.kisa_aciklama }}</span>
+                                </div>
+                                {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if kritik_stoklar %}
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color: #f39c12;"></i> Kritik Stok Uyarıları</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Malzeme</th>
+                                <th>Kategori</th>
+                                <th>Mevcut Stok</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stok in kritik_stoklar %}
+                            <tr>
+                                <td>{{ stok.malzeme_adi }}</td>
+                                <td>{{ stok.kategori }}</td>
+                                <td>{{ stok.stok_miktari }} {{ stok.birim }}</td>
+                                <td><span class="badge badge-danger">Kritik</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde aktif menü linkini işaretle
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (window.location.pathname === new URL(link.href).pathname) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

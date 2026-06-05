@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Baskı Talebi</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ana Menü</div>
+                    <a href="/ogrenci" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Ana Sayfa</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">İşlemler</div>
+                    <a href="/ogrenci/yeni-talep" class="nav-link active">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Yeni Talep</span>
+                    </a>
+                    <a href="/ogrenci/taleplerim" class="nav-link">
+                        <i class="fas fa-list"></i>
+                        <span>Taleplerim</span>
+                    </a>
+                    <a href="/ogrenci/cihazlar" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Cihazlar</span>
+                    </a>
+                    <a href="/ogrenci/rezervasyon" class="nav-link">
+                        <i class="fas fa-microchip"></i>
+                        <span>Malzeme Rezerve Et</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Öğrenci</div>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Yeni Baskı Talebi</h1>
+                <p class="page-subtitle">3D baskı talebinizi oluşturun. STL dosyanızı yükleyin ve baskı detaylarını girin.</p>
+            </div>
+
+            {% if success %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                Talebiniz başarıyla oluşturuldu! Teknisyen onayı bekleniyor.
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if limit_bilgi %}
+            <div class="alert alert-warning">
+                <i class="fas fa-calendar-alt"></i>
+                {{ limit_bilgi }}
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-file-upload"></i> Talep Formu</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/ogrenci/yeni-talep" method="POST" enctype="multipart/form-data">
+                        <!-- Dosya Yükleme -->
+                        <div class="form-group">
+                            <label>3D Model Dosyası (STL)</label>
+                            <label class="file-upload" for="dosya">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Dosya yüklemek için tıklayın</strong></p>
+                                <p>veya sürükleyip bırakın</p>
+                                <p style="font-size: 12px; margin-top: 8px;">Desteklenen formatlar: .stl, .obj, .3mf</p>
+                                <input type="file" id="dosya" name="dosya" accept=".stl,.obj,.3mf" style="display: none;" required>
+                            </label>
+                            <p id="dosya-adi" style="margin-top: 8px; color: var(--primary-blue); font-weight: 600;"></p>
+                        </div>
+
+                        <div class="form-row">
+                            <!-- Baskı Kalitesi -->
+                            <div class="form-group">
+                                <label for="baski_kalitesi">Baskı Kalitesi</label>
+                                <select id="baski_kalitesi" name="baski_kalitesi" class="form-control" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Draft">Draft (Hızlı - 0.3mm)</option>
+                                    <option value="Normal">Normal (Standart - 0.2mm)</option>
+                                    <option value="Fine">Fine (Detaylı - 0.1mm)</option>
+                                    <option value="Extra Fine">Extra Fine (Çok Detaylı - 0.05mm)</option>
+                                </select>
+                            </div>
+
+                            <!-- Doluluk Oranı -->
+                            <div class="form-group">
+                                <label for="doluluk_orani">Doluluk Oranı (%)</label>
+                                <select id="doluluk_orani" name="doluluk_orani" class="form-control" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="10">%10 - Çok Hafif</option>
+                                    <option value="20">%20 - Hafif</option>
+                                    <option value="30">%30 - Normal</option>
+                                    <option value="50">%50 - Orta</option>
+                                    <option value="75">%75 - Sağlam</option>
+                                    <option value="100">%100 - Dolu</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <!-- Tahmini Süre -->
+                            <div class="form-group">
+                                <label for="tahmini_sure">Tahmini Süre (dakika)</label>
+                                <input type="number" id="tahmini_sure" name="tahmini_sure" class="form-control" placeholder="Örn: 120" min="1">
+                                <small style="color: var(--text-muted);">Slicer programından öğrenebilirsiniz</small>
+                            </div>
+
+                            <!-- Renk Tercihi -->
+                            <div class="form-group">
+                                <label for="renk">Filament Renk Tercihi</label>
+                                <select id="renk" name="renk" class="form-control">
+                                    <option value="Farketmez">Farketmez</option>
+                                    <option value="Beyaz">Beyaz</option>
+                                    <option value="Siyah">Siyah</option>
+                                    <option value="Kırmızı">Kırmızı</option>
+                                    <option value="Mavi">Mavi</option>
+                                    <option value="Yeşil">Yeşil</option>
+                                    <option value="Sarı">Sarı</option>
+                                    <option value="Turuncu">Turuncu</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Açıklama -->
+                        <div class="form-group">
+                            <label for="aciklama">Açıklama / Notlar</label>
+                            <textarea id="aciklama" name="aciklama" class="form-control" rows="4" placeholder="Baskı ile ilgili özel isteklerinizi veya notlarınızı yazabilirsiniz..."></textarea>
+                        </div>
+
+                        <!-- Kurallar -->
+                        <div class="alert alert-warning" style="margin-bottom: 24px;">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Önemli Bilgiler:</strong>
+                                <ul style="margin: 8px 0 0 16px; font-size: 14px;">
+                                    <li>Baskı talepleriniz teknisyen onayına tabidir.</li>
+                                    <li>Onaylanan baskılar sıraya alınır ve müsait yazıcıya atanır.</li>
+                                    <li>Baskı tamamlandığında e-posta ile bilgilendirileceksiniz.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: auto;">
+                            <i class="fas fa-paper-plane"></i>
+                            Talep Oluştur
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Taleplerim Özeti -->
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-history"></i> Son Taleplerim</h3>
+                    <a href="/ogrenci/taleplerim" class="btn btn-sm btn-secondary">Tümünü Gör</a>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Talep No</th>
+                                <th>Dosya</th>
+                                <th>Kalite</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                                <th>Tahmini Bitiş</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <!-- student_request.html içindeki tablo gövdesini bu şekilde güncelle -->
+                        <tbody>
+                            {% for talep in son_talepler %}
+                            <tr>
+                                <td><strong>#{{ talep.id }}</strong></td>
+                                <td>{{ talep.dosya_adi }}</td>
+                                <td>{{ talep.baski_kalitesi }}</td>
+                                <td>
+                                    {% if talep.durum == 'Beklemede' %}
+                                        <span class="badge badge-warning">Beklemede</span>
+                                    {% elif talep.durum == 'Basılıyor' %}
+                                        <span class="badge badge-info">Basılıyor</span>
+                                    {% else %}
+                                        <span class="badge badge-success">{{ talep.durum }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ talep.talep_tarihi }}</td>
+                                <td>
+                                    {% if talep.durum == 'Beklemede' and talep.tahmini_bitis %}
+                                        <span style="color: var(--text-muted);"><i class="fas fa-clock"></i> {{ talep.tahmini_bitis }}</span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <!-- Sadece Beklemede olanlar için SİL butonu -->
+                                    {% if talep.durum == 'Beklemede' %}
+                                    <!-- Düzenle Butonu (Mavi) -->
+                                    <button type="button" class="btn btn-sm btn-info"
+                                            onclick="openEditModal('{{ talep.id }}', '{{ talep.baski_kalitesi }}', '{{ talep.doluluk_orani }}', '{{ talep.tahmini_sure_dakika }}', '{{ talep.renk }}', '{{ talep.aciklama }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form action="/ogrenci/talep/sil/{{ talep.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Bu talebi silmek istediğinize emin misiniz?');">
+                                        <button type="submit" class="btn btn-sm btn-danger" style="padding: 2px 8px;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dosya seçildiğinde adını göster
+        document.getElementById('dosya').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('dosya-adi').textContent = '📄 ' + fileName;
+                document.querySelector('.file-upload p:first-of-type').innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Dosya seçildi';
+            }
+        });
+
+        // Drag & Drop
+        const fileUpload = document.querySelector('.file-upload');
+        
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--primary-blue)';
+            this.style.background = 'rgba(30, 136, 229, 0.1)';
+        });
+
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            this.style.background = 'var(--bg-light)';
+        });
+
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            this.style.background = 'var(--bg-light)';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('dosya').files = files;
+                document.getElementById('dosya-adi').textContent = '📄 ' + files[0].name;
+                document.querySelector('.file-upload p:first-of-type').innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Dosya seçildi';
+            }
+        });
+    </script>
+        <div id="editModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto;">
+        <div class="modal-content" style="background-color: #fff; margin: 5% auto; padding: 20px; border-radius: 8px; width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <h3 class="card-title"><i class="fas fa-edit"></i> Talebi Düzenle</h3>
+            <hr>
+            <form id="editForm" method="POST">
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:10px;">
+                        <label>Baskı Kalitesi</label>
+                        <select id="edit_kalite" name="baski_kalitesi" class="form-control" required>
+                            <option value="Draft">Draft</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Fine">Fine</option>
+                            <option value="Extra Fine">Extra Fine</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Doluluk (%)</label>
+                        <select id="edit_doluluk" name="doluluk_orani" class="form-control" required>
+                            <option value="10">%10 - Çok Hafif</option>
+                            <option value="20">%20 - Hafif</option>
+                            <option value="30">%30 - Normal</option>
+                            <option value="50">%50 - Orta</option>
+                            <option value="75">%75 - Sağlam</option>
+                            <option value="100">%100 - Dolu</option>
+                        </select> 
+                    </div>        
+                </div>
+                <div class="form-row" style="margin-top:15px;">
+                    <div class="form-group" style="flex:1; margin-right:10px;">
+                        <label>Süre (Dk)</label>
+                        <input type="number" id="edit_sure" name="tahmini_sure" class="form-control">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Renk</label>
+                        <select id="edit_renk" name="renk" class="form-control">
+                            <option value="Farketmez">Farketmez</option>
+                            <option value="Beyaz">Beyaz</option>
+                            <option value="Siyah">Siyah</option>
+                            <option value="Kırmızı">Kırmızı</option>
+                            <option value="Mavi">Mavi</option>
+                            <option value="Yeşil">Yeşil</option>
+                            <option value="Sarı">Sarı</option>
+                            <option value="Turuncu">Turuncu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:15px;">
+                    <label>Açıklama</label>
+                    <textarea id="edit_aciklama" name="aciklama" class="form-control" rows="3"></textarea>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">İptal</button>
+                    <button type="submit" class="btn btn-primary" style="background-color: #ff6b35;">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Düzenleme İşlemi İçin JavaScript Fonksiyonları -->
+    <script>
+    function openEditModal(id, kalite, doluluk, sure, renk, aciklama) {
+    // Formun gönderileceği adresi (ID'yi) dinamik olarak günceller
+    document.getElementById('editForm').action = '/ogrenci/talep/duzenle/' + id;
+    
+    // Mevcut tüm verileri modal içindeki giriş kutularına doldurur
+    document.getElementById('edit_kalite').value = kalite;
+    document.getElementById('edit_doluluk').value = doluluk;
+    document.getElementById('edit_sure').value = sure;
+    document.getElementById('edit_renk').value = renk;
+    document.getElementById('edit_aciklama').value = aciklama;
+    
+    // Gizli olan modal penceresini görünür yapar
+    document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        // Modalı gizle
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Kullanıcı modal dışındaki karaltıya tıklarsa pencereyi kapat
+    window.onclick = function(event) {
+        let modal = document.getElementById('editModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    </script>
+</body>
+</html>

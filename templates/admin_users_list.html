@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Kullanıcı Yönetimi</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ana Menü</div>
+                    <a href="/admin" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Yönetim</div>
+                    <a href="/admin/cihazlar" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Cihazlar</span>
+                    </a>
+                    <a href="/admin/talepler" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>İş Talepleri</span>
+                    </a>
+                    <a href="/admin/stoklar" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <span>Stok Yönetimi</span>
+                    </a>
+                    <a href="/admin/kullanicilar" class="nav-link active">
+                        <i class="fas fa-users"></i>
+                        <span>Kullanıcılar</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Raporlar</div>
+                    <a href="/admin/loglar" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Sistem Logları</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Yönetici</div>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Kullanıcı Yönetimi</h1>
+                <p class="page-subtitle">Sistemde kayıtlı kullanıcıları ve rollerini buradan görüntüleyebilirsiniz.</p>
+            </div>
+
+            {% if success %}
+            <div class="alert alert-success" style="margin-bottom: 16px;">
+                <i class="fas fa-check-circle"></i> {{ success }}
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="alert alert-danger" style="margin-bottom: 16px;">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-users"></i> Kullanıcı Listesi</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ad Soyad</th>
+                                <th>E-posta</th>
+                                <th>Rol</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for k in kullanicilar %}
+                            <tr>
+                                <td>#{{ k.id }}</td>
+                                <td>{{ k.ad_soyad }}</td>
+                                <td>{{ k.email }}</td>
+                                <td>
+                                    <span class="badge {% if k.rol == 'Yönetici' %}badge-danger{% elif k.rol == 'Teknisyen' %}badge-info{% else %}badge-success{% endif %}">
+                                        {{ k.rol }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if k.id == kullanici.id %}
+                                    <button class="btn btn-sm btn-secondary" disabled title="Kendi hesabınızı silemezsiniz">
+                                        <i class="fas fa-lock"></i> Korumalı
+                                    </button>
+                                    {% else %}
+                                    <form action="/admin/kullanicilar/sil/{{ k.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Bu kullanıcı silinsin mi? Bu işlem geri alınamaz.');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not kullanicilar %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                                    Kayıtlı kullanıcı bulunamadı.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

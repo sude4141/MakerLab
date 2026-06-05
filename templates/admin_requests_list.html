@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MakerLab - Tüm İş Talepleri (Yönetici)</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Dashboard ile aynı Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-cube"></i></div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            <nav>
+                <div class="nav-section">
+                    <a href="/admin" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                    <a href="/admin/cihazlar" class="nav-link"><i class="fas fa-print"></i><span>Cihazlar</span></a>
+                    <a href="/admin/talepler" class="nav-link active"><i class="fas fa-clipboard-list"></i><span>İş Talepleri</span></a>
+                </div>
+            </nav>
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Yönetici</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Tüm İş Talepleri</h1>
+                <p class="page-subtitle">Sistemdeki tüm öğrenci taleplerinin detaylı listesi.</p>
+            </div>
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Öğrenci</th>
+                                <th>Dosya</th>
+                                <th>Kalite</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for talep in talepler %}
+                            <tr>
+                                <td>#{{ talep.id }}</td>
+                                <td>{{ talep.ogrenci_adi }}</td>
+                                <td>{{ talep.dosya_adi }}</td>
+                                <td>{{ talep.baski_kalitesi }}</td>
+                                <td><span class="badge {% if talep.durum == 'Tamamlandı' %}badge-success{% else %}badge-warning{% endif %}">{{ talep.durum }}</span></td>
+                                <td>{{ talep.talep_tarihi }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

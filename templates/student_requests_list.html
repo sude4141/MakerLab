@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Tüm Taleplerim</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar (Yan Menü) - Tasarımın düzelmesi için bu şart! -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-cube"></i></div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ana Menü</div>
+                    <a href="/ogrenci" class="nav-link">
+                        <i class="fas fa-home"></i><span>Ana Sayfa</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">İşlemler</div>
+                    <a href="/ogrenci/yeni-talep" class="nav-link">
+                        <i class="fas fa-plus-circle"></i><span>Yeni Talep</span>
+                    </a>
+                    <a href="/ogrenci/taleplerim" class="nav-link active">
+                        <i class="fas fa-list"></i><span>Taleplerim</span>
+                    </a>
+                    <a href="/ogrenci/cihazlar" class="nav-link">
+                        <i class="fas fa-print"></i><span>Cihazlar</span>
+                    </a>
+                    <a href="/ogrenci/rezervasyon" class="nav-link">
+                        <i class="fas fa-microchip"></i><span>Malzeme Rezerve Et</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Öğrenci</div>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Tüm Baskı Taleplerim</h1>
+                <p class="page-subtitle">Bugüne kadar oluşturduğunuz tüm talepler aşağıda listelenmiştir.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-list"></i> Talep Geçmişi</h3>
+                    <a href="/ogrenci/yeni-talep" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Yeni Talep
+                    </a>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Talep No</th>
+                                <th>Dosya</th>
+                                <th>Kalite</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for talep in talepler %}
+                            <tr>
+                                <td><strong>#{{ talep.id }}</strong></td>
+                                <td>{{ talep.dosya_adi }}</td>
+                                <td>{{ talep.baski_kalitesi }}</td>
+                                <td>
+                                    <span class="badge {% if talep.durum == 'Beklemede' %}badge-warning{% elif talep.durum == 'Tamamlandı' %}badge-success{% else %}badge-info{% endif %}">
+                                        {{ talep.durum }}
+                                    </span>
+                                </td>
+                                <td>{{ talep.talep_tarihi }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

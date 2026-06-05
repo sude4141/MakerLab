@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Stok Yönetimi</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-cube"></i></div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            <nav>
+                <div class="nav-section">
+                    <a href="/admin" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                    <a href="/admin/cihazlar" class="nav-link"><i class="fas fa-print"></i><span>Cihazlar</span></a>
+                    <a href="/admin/stoklar" class="nav-link active"><i class="fas fa-boxes"></i><span>Stok Yönetimi</span></a>
+                    <a href="/admin/talepler" class="nav-link"><i class="fas fa-clipboard-list"></i><span>İş Talepleri</span></a>
+                </div>
+            </nav>
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Yönetici</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Stok ve Envanter Yönetimi</h1>
+                <p class="page-subtitle">Atölye sarf malzemelerini ve elektronik bileşenleri buradan yönetebilirsiniz.</p>
+            </div>
+
+            <div class="card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <h3><i class="fas fa-plus-circle"></i> Yeni Malzeme Ekle</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/stok-ekle" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Malzeme Adı</label>
+                            <input type="text" name="malzeme_adi" class="form-control" placeholder="Örn: PLA Filament Kırmızı" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Kategori Seçin</label>
+                            <select name="kategori_id" class="form-control" required>
+                                <option value="">-- Kategori Seçin --</option>
+                                {% for kat in kategoriler %}
+                                    <option value="{{ kat.id }}">{{ kat.kategori_adi }}</option>
+                                {% endfor %}
+                                </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Başlangıç Stoğu</label>
+                            <input type="number" name="miktar" class="form-control" placeholder="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Birim</label>
+                            <input type="text" name="birim" class="form-control" placeholder="Gram, Adet, Metre..." required>
+                        </div>
+
+                        <div style="grid-column: span 2;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-save"></i> Malzemeyi Envantere Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Güncel Stok Listesi</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Malzeme Adı</th>
+                                <th>Kategori</th>
+                                <th>Mevcut Stok</th>
+                                <th>Birim</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stok in stoklar %}
+                            <tr>
+                                <td>#{{ stok.id }}</td>
+                                <td><strong>{{ stok.malzeme_adi }}</strong></td>
+                                <td><span class="badge badge-info">{{ stok.kategori }}</span></td>
+                                <td>{{ stok.stok_miktari }}</td>
+                                <td>{{ stok.birim }}</td>
+                                <td>
+                                    {% if stok.stok_miktari <= 10 %}
+                                        <span class="badge badge-danger">Kritik Seviye</span>
+                                    {% else %}
+                                        <span class="badge badge-success">Yeterli</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not stoklar %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                                    Henüz stok kaydı bulunmuyor.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

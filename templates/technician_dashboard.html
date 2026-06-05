@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakerLab - Teknisyen Paneli</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="sidebar-logo-text">MakerLab</span>
+            </div>
+            
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ana Menü</div>
+                    <a href="/teknisyen" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">İşlemler</div>
+                    <a href="/teknisyen/talepler" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>İş Talepleri</span>
+                    </a>
+                    <a href="/teknisyen/cihazlar" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Cihazlar</span>
+                    </a>
+                    <a href="/teknisyen/stok" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <span>Stok</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="user-info">
+                <div class="user-info-name">{{ kullanici.ad_soyad }}</div>
+                <div class="user-info-role">Teknisyen</div>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Teknisyen Paneli</h1>
+                <p class="page-subtitle">İş taleplerini yönetin, cihazları kontrol edin ve stok takibi yapın.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ bekleyen_talepler }}</h3>
+                        <p>Bekleyen Talep</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-cog fa-spin"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ aktif_baskilar }}</h3>
+                        <p>Aktif Baskı</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ musait_cihazlar }}</h3>
+                        <p>Müsait Cihaz</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ dusuk_stok }}</h3>
+                        <p>Düşük Stok</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bekleyen Talepler -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-clock"></i> Onay Bekleyen Talepler</h3>
+                    <a href="/teknisyen/talepler" class="btn btn-sm btn-secondary">Tümünü Gör</a>
+                </div>
+                <div class="card-body">
+                    {% for talep in bekleyen_talep_listesi %}
+                    <div class="request-card">
+                        <div class="request-header">
+                            <span class="request-id">Talep #{{ talep.id }}</span>
+                            <span class="badge badge-warning">Beklemede</span>
+                        </div>
+                        <div class="request-body">
+                            <div class="request-item">
+                                <span class="request-item-label">Öğrenci</span>
+                                <span class="request-item-value">{{ talep.ogrenci_adi }}</span>
+                            </div>
+                            <div class="request-item">
+                                <span class="request-item-label">Dosya</span>
+                                <span class="request-item-value">{{ talep.dosya_adi }}</span>
+                            </div>
+                            <div class="request-item">
+                                <span class="request-item-label">Kalite</span>
+                                <span class="request-item-value">{{ talep.baski_kalitesi }}</span>
+                            </div>
+                            <div class="request-item">
+                                <span class="request-item-label">Doluluk</span>
+                                <span class="request-item-value">%{{ talep.doluluk_orani }}</span>
+                            </div>
+                            <div class="request-item">
+                                <span class="request-item-label">Tahmini Süre</span>
+                                <span class="request-item-value">{{ talep.tahmini_sure_dakika }} dk</span>
+                            </div>
+                            <div class="request-item">
+                                <span class="request-item-label">Tarih</span>
+                                <span class="request-item-value">{{ talep.talep_tarihi }}</span>
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            <form action="/teknisyen/talep/onayla/{{ talep.id }}" method="POST" style="display: inline;">
+                                <select name="cihaz_id" class="form-control" style="width: auto; display: inline-block; margin-right: 12px;" required>
+                                    <option value="">Cihaz Seç</option>
+                                    {% for cihaz in musait_cihaz_listesi %}
+                                    <option value="{{ cihaz.id }}" title="{{ cihaz.kisa_aciklama }}">{{ cihaz.marka_model }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Onayla ve Ata
+                                </button>
+                            </form>
+                            <form action="/teknisyen/talep/reddet/{{ talep.id }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times"></i> Reddet
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not bekleyen_talep_listesi %}
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 16px;"></i>
+                        <p>Tüm talepler işlenmiş. Bekleyen talep yok.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Aktif Baskılar -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-cog"></i> Aktif Baskılar</h3>
+                </div>
+                <div class="card-body">
+                    <div class="device-grid">
+                        {% for baski in aktif_baski_listesi %}
+                        <div class="device-card busy">
+                            <div class="device-header">
+                                <span class="device-name">{{ baski.cihaz_adi }}</span>
+                                <span class="badge badge-info">Basılıyor</span>
+                            </div>
+                            <div class="device-info">
+                                <span><i class="fas fa-file"></i> {{ baski.dosya_adi }}</span>
+                                <span><i class="fas fa-user"></i> {{ baski.ogrenci_adi }}</span>
+                                <span><i class="fas fa-clock"></i> Başlangıç: {{ baski.baslangic_tarihi }}</span>
+                            </div>
+                            <form action="/teknisyen/baski/tamamla/{{ baski.id }}" method="POST" style="margin-top: 16px;">
+                                <button type="submit" class="btn btn-success btn-sm" style="width: 100%;">
+                                    <i class="fas fa-check-circle"></i> Baskıyı Tamamla
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if not aktif_baski_listesi %}
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1 / -1;">
+                            <i class="fas fa-pause-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>Şu anda aktif baskı yok.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cihaz Durumları -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-print"></i> Cihaz Durumları</h3>
+                    <a href="/teknisyen/cihazlar" class="btn btn-sm btn-secondary">Yönet</a>
+                </div>
+                <div class="card-body">
+                    <div class="device-grid">
+                        {% for cihaz in cihazlar %}
+                        <div class="device-card {{ 'available' if cihaz.durum == 'Müsait' else 'busy' if cihaz.durum == 'Meşgul' else 'maintenance' }}">
+                            <div class="device-header">
+                                <span class="device-name">{{ cihaz.marka_model }}</span>
+                                <span class="badge {{ 'badge-success' if cihaz.durum == 'Müsait' else 'badge-warning' if cihaz.durum == 'Meşgul' else 'badge-danger' }}">
+                                    {{ cihaz.durum }}
+                                </span>
+                            </div>
+                            <div class="device-info">
+                                <span><i class="fas fa-calendar"></i> Eklenme: {{ cihaz.eklenme_tarihi }}</span>
+                                {% if cihaz.kisa_aciklama %}
+                                <span style="font-size: 13px; color: var(--text-muted);"><i class="fas fa-info-circle"></i> {{ cihaz.kisa_aciklama }}</span>
+                                {% endif %}
+                            </div>
+                            {% if cihaz.durum != 'Meşgul' %}
+                            <div style="margin-top: 12px;">
+                                <form action="/teknisyen/cihaz/durum/{{ cihaz.id }}" method="POST" style="display: inline;">
+                                    {% if cihaz.durum == 'Müsait' %}
+                                    <input type="hidden" name="yeni_durum" value="Arızalı">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-tools"></i> Arızalı İşaretle
+                                    </button>
+                                    {% else %}
+                                    <input type="hidden" name="yeni_durum" value="Müsait">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Müsait İşaretle
+                                    </button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
