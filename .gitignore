@@ -1,0 +1,26 @@
+# Sanal ortam
+.venv/
+venv/
+env/
+
+# Python derleme/önbellek
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Ortam değişkenleri / gizli ayarlar
+.env
+
+# Yüklenen kullanıcı dosyaları (klasör korunur, içerik yüklenmez)
+uploads/*
+!uploads/.gitkeep
+
+# IDE / editör
+.vscode/
+.idea/
+*.swp
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
